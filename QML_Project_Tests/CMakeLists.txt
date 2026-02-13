@@ -157,7 +157,6 @@ add_executable(${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::Qml Qt6::Quick Qt6::QuickControls2 Qt6::Test)
 include(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/Doxygen.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/GoogleTest.cmake)
-include(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/CommonLib.cmake)
 
 if (WIN32)
     if (MSVC OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))

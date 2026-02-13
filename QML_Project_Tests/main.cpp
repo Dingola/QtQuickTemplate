@@ -2,34 +2,22 @@
 
 #include <QApplication>
 
-#include "Services/Logging/ConsoleAppender.h"
-#include "Services/Logging/FileAppender.h"
-#include "Services/Logging/Logger.h"
-#include "Services/Logging/SimpleFormatter.h"
-
-using namespace QmlApp;
-
+/**
+ * @brief Initializes and runs all Google Test unit tests.
+ *
+ * This function sets up the Google Test framework and executes all registered tests.
+ *
+ * @param argc Number of command-line arguments.
+ * @param argv Array of command-line arguments.
+ * @return The result of the test run (0 if all tests pass, otherwise non-zero).
+ */
 auto main(int argc, char* argv[]) -> int
 {
     testing::InitGoogleTest(&argc, argv);
     QApplication app(argc, argv);
-    app.setApplicationName(QStringLiteral("QmlAppTest"));
-    app.setOrganizationName(QStringLiteral("QmlDesktopAppTemplate_Tests"));
+    app.setApplicationName(QStringLiteral("QtQuickAppTest"));
+    app.setOrganizationName(QStringLiteral("QtQuickTemplate_Tests"));
     app.setOrganizationDomain(QStringLiteral("AdrianHelbig.de"));
-
-    // Set up logging
-    auto formatter = QSharedPointer<SimpleFormatter>::create();
-    auto console_appender = QSharedPointer<ConsoleAppender>::create(formatter);
-    auto file_appender = QSharedPointer<FileAppender>::create("QmlApp.log", formatter);
-
-    Logger::get_instance().add_appender(console_appender);
-    Logger::get_instance().add_appender(file_appender);
-
-    // Install the custom message handler
-    qInstallMessageHandler(
-        [](QtMsgType type, const QMessageLogContext& context, const QString& msg) {
-            Logger::get_instance().log(type, context, msg);
-        });
 
     return RUN_ALL_TESTS();
 }
