@@ -46,12 +46,10 @@ file(GLOB_RECURSE Headers
 file(GLOB_RECURSE CPP_Sources
      "main.cpp"
      "Sources/*.cpp"
-     "Headers/Qt/*/*.cpp"
-     "Sources/Qt/*.cpp"
 )
 
 file(GLOB_RECURSE QML_Sources
-     "Sources/QML/*.qml"
+     "QML/*.qml"
 )
 
 # Combine C++ and QML sources
@@ -259,7 +257,7 @@ if (WIN32)
 		# Run windeployqt immediately after build
 		add_custom_command(TARGET ${PROJECT_NAME}
 			POST_BUILD
-			COMMAND "${WINDEPLOYQT_ENV_SETUP}" && "${WINDEPLOYQT_EXECUTABLE}" \"$<TARGET_FILE:${PROJECT_NAME}>\" "--qmldir=${CMAKE_CURRENT_SOURCE_DIR}/Sources/QML"
+			COMMAND "${WINDEPLOYQT_ENV_SETUP}" && "${WINDEPLOYQT_EXECUTABLE}" \"$<TARGET_FILE:${PROJECT_NAME}>\" "--qmldir=${CMAKE_CURRENT_SOURCE_DIR}/QML"
 			COMMENT "Running windeployqt..."
 		)
 		

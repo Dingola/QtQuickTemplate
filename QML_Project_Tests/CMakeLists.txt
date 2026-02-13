@@ -43,7 +43,7 @@ file(GLOB_RECURSE CPP_Sources
 )
 
 file(GLOB_RECURSE QML_Sources
-     "Sources/QML/*.qml"
+     "QML/*.qml"
 )
 
 # Combine C++ and QML sources
