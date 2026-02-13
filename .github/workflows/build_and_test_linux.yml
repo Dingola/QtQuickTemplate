@@ -57,14 +57,17 @@ jobs:
           arch: 'linux_gcc_64'
           base-url: 'https://download.qt.io/official_releases/'
 
-      # Set QT6_DIR environment variable
-      - name: Set QT6_DIR
-        run: echo "QT6_DIR=${{ github.workspace }}/../Qt/${{ env.QT_VERSION }}/gcc_64" >> $GITHUB_ENV
+      # Install CMake
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v1
+        with:
+          cmake-version: 'latest'
 
       # Configure CMake
       - name: Configure CMake
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+                -DCMAKE_PREFIX_PATH="${{ github.workspace }}/../Qt/${{ env.QT_VERSION }}/gcc_64" \
                 -DMAIN_PROJECT_NAME=${{ env.MAIN_PROJECT_NAME }} \
                 -D${{ env.MAIN_PROJECT_NAME }}_BUILD_TARGET_TYPE=${{ env.BUILD_TARGET_TYPE }} \
                 -D${{ env.MAIN_PROJECT_NAME }}_BUILD_TEST_PROJECT=${{ env.BUILD_TEST_PROJECT }} \
@@ -87,7 +90,7 @@ jobs:
       - name: Generate coverage report
         run: |
           cd build
-          gcovr --root ${{ github.workspace }} -r ${{ github.workspace }} --xml-pretty -o coverage.xml
+          gcovr --root ${{ github.workspace }} -r ${{ github.workspace }} --filter '${{ github.workspace }}/QML_Project/.*' --xml-pretty -o coverage.xml
 
       # Upload coverage to Codecov
       - name: Upload coverage to Codecov
