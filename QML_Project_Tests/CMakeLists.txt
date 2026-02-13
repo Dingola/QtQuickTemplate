@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.29.3 FATAL_ERROR)
 
 ############################################
 ### Setup project                        ###
@@ -10,10 +10,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Include CMake helper scripts
 include(${CMAKE_SOURCE_DIR}/CMake/SourceGroups.cmake)
 include(${CMAKE_SOURCE_DIR}/CMake/BuildThirdPartyProject.cmake)
+include(${CMAKE_SOURCE_DIR}/CMake/IncludeThirdParty.cmake)
 
 ############################################
 ### Global Properties                    ###
 ############################################
+
+# Disable CMake searching for modules
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 # Global properties for project organization
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -55,19 +59,8 @@ include_directories(Headers Sources)
 ### Qt6 Configuration                    ###
 ############################################
 
-if ("$ENV{QT6_DIR}" STREQUAL "")
-	set(QT6_DIR "E:\\Qt\\6.8.0\\msvc2022_64\\")
-else()
-	set(QT6_DIR "$ENV{QT6_DIR}")
-endif()
+find_package(Qt6 REQUIRED COMPONENTS Widgets Qml Quick QuickControls2 Gui Test LinguistTools)
 
-if (EXISTS ${QT6_DIR})
-	set(CMAKE_PREFIX_PATH ${QT6_DIR})
-else()
-	message(WARNING "The specified qt6 path '${QT6_DIR}' does not exist")
-endif()
-
-find_package(Qt6 REQUIRED COMPONENTS Widgets Qml Quick QuickControls2 Gui LinguistTools)
 qt_standard_project_setup()
 #qt6_add_resources(RSCS resources.qrc)
 #add_custom_target(gen_qrc DEPENDS ${RSCS})
@@ -80,7 +73,7 @@ if(USE_CLANG_FORMAT)
     find_program(CLANG_FORMAT "clang-format" HINTS ${CLANG_TOOLS_PATH})
     if(CLANG_FORMAT)
         # Define a custom target for formatting code
-        add_custom_target(_run_clang_format_tests
+        add_custom_target(${PROJECT_NAME}_run_clang_format_tests
             COMMAND ${CLANG_FORMAT}
             -style=file:${CMAKE_SOURCE_DIR}/Configs/.clang-format
             -i
@@ -89,6 +82,7 @@ if(USE_CLANG_FORMAT)
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "Formatting code with clang-format"
         )
+        set_target_properties(${PROJECT_NAME}_run_clang_format_tests PROPERTIES FOLDER "_Tasks")
     else()
         message(WARNING "clang-format not found. Please ensure clang-format is installed and the path is set correctly.")
     endif()
@@ -102,7 +96,7 @@ if(USE_CLANG_TIDY)
     find_program(CLANG_TIDY "clang-tidy" HINTS ${CLANG_TOOLS_PATH})
     if(CLANG_TIDY)
         # Define a custom target for running clang-tidy
-        add_custom_target(_run_clang_tidy_tests
+        add_custom_target(${PROJECT_NAME}_run_clang_tidy_tests
             COMMAND ${CLANG_TIDY}
 			--config-file=${CMAKE_SOURCE_DIR}/Configs/.clang-tidy
             -p=${CMAKE_BINARY_DIR}
@@ -111,6 +105,7 @@ if(USE_CLANG_TIDY)
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "Running clang-tidy for static analysis"
         )
+        set_target_properties(${PROJECT_NAME}_run_clang_tidy_tests PROPERTIES FOLDER "_Tasks")
     else()
         message(WARNING "clang-tidy not found. Please ensure clang-tidy is installed and the path is set correctly.")
     endif()
@@ -136,7 +131,7 @@ message(STATUS "  Source Directory:             ${CMAKE_SOURCE_DIR}")
 message(STATUS "  Build Type:                   ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Toolchain File:               ${CMAKE_TOOLCHAIN_FILE}")
 message(STATUS "  C++ Compiler:                 ${CMAKE_CXX_COMPILER}")
-message(STATUS "  C Compiler:                   ${CMAKE_C_COMPILER}")
+message(STATUS "  C Compiler:                   ${CMAKE_C_Compiler}")
 message(STATUS "  Build Tool:                   ${CMAKE_BUILD_TOOL}")
 message(STATUS "  Module Path:                  ${CMAKE_MODULE_PATH}")
 message(STATUS "  Binary Directory:             ${CMAKE_BINARY_DIR}")
@@ -147,7 +142,7 @@ message(STATUS "-----------------------------------------------")
 message(STATUS "")
 message(STATUS "  Third Party Include Directory:            ${THIRD_PARTY_INCLUDE_DIR}")
 message(STATUS "  ${doc_sub_target_name}_BUILD_DOC:          ${${doc_sub_target_name}_BUILD_DOC}")
-message(STATUS "  Qt6 Directory (QT6_DIR env):              ${QT6_DIR}")
+message(STATUS "  Qt6 Directory (Qt6_DIR):                  ${Qt6_DIR}")
 message(STATUS "")
 message(STATUS "-----------------------------------------------")
 message(STATUS "")
@@ -159,16 +154,18 @@ message(STATUS "###############################################################"
 
 add_executable(${PROJECT_NAME})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::Qml Qt6::Quick Qt6::QuickControls2)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Gui Qt6::Qml Qt6::Quick Qt6::QuickControls2 Qt6::Test)
 include(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/Doxygen.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/GoogleTest.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/CommonLib.cmake)
 
 if (WIN32)
-    set_target_properties(${PROJECT_NAME} PROPERTIES 
-        LINK_FLAGS "/SUBSYSTEM:CONSOLE"
-        WIN32_EXECUTABLE ON
-    )
+    if (MSVC OR (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
+		set_target_properties(${PROJECT_NAME} PROPERTIES
+			LINK_FLAGS "/SUBSYSTEM:CONSOLE"
+			WIN32_EXECUTABLE ON
+		)
+    endif()
 elseif (APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES 
         MACOSX_BUNDLE ON
@@ -184,24 +181,48 @@ target_sources(${PROJECT_NAME}
 )
 
 if (WIN32)
-	# Retrieve the absolute path to qmake and then use that path to find
-	# the windeployqt executable
-	find_program(WINDEPLOYQT_ENV_SETUP qtenv2.bat HINTS "${QT6_DIR}/bin")
-	find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${QT6_DIR}/bin")
+    # Prefer Qt's deploy support if available
+    if (DEFINED Qt6_DIR AND EXISTS "${Qt6_DIR}/Qt6DeploySupport.cmake")
+        include("${Qt6_DIR}/Qt6DeploySupport.cmake")
 
-	# Run windeployqt immediately after build
-	add_custom_command(TARGET ${PROJECT_NAME}
-		POST_BUILD
-		COMMAND "${WINDEPLOYQT_ENV_SETUP}" && "${WINDEPLOYQT_EXECUTABLE}" \"$<TARGET_FILE:${PROJECT_NAME}>\"
-	)
+        qt_generate_deploy_app_script(
+            TARGET ${PROJECT_NAME}
+            OUTPUT_SCRIPT deploy_script
+        )
+
+        add_custom_command(TARGET ${PROJECT_NAME}
+            POST_BUILD
+            COMMAND "${CMAKE_COMMAND}" -DQT_DEPLOY_BIN_DIR="$<TARGET_FILE_DIR:${PROJECT_NAME}>" -P "${deploy_script}"
+            COMMENT "Deploying Qt runtime dependencies via Qt6DeploySupport..."
+        )
+    else()
+        message(STATUS "Qt6DeploySupport.cmake not found. Falling back to windeployqt.")
+
+        # Qt6_DIR points to <prefix>/lib/cmake/Qt6, go up three levels to get <prefix>
+        get_filename_component(_qt_prefix "${Qt6_DIR}/../../.." ABSOLUTE)
+        find_program(WINDEPLOYQT_EXECUTABLE
+            NAMES windeployqt windeployqt6
+            HINTS "${_qt_prefix}/bin"
+        )
+
+        if (WINDEPLOYQT_EXECUTABLE)
+            add_custom_command(TARGET ${PROJECT_NAME}
+                POST_BUILD
+                COMMAND "${WINDEPLOYQT_EXECUTABLE}" "$<TARGET_FILE:${PROJECT_NAME}>"
+                COMMENT "Deploying Qt runtime dependencies via windeployqt..."
+            )
+        else()
+            message(WARNING "windeployqt not found; no automatic deployment will be performed.")
+        endif()
+    endif()
 endif()
 
 ############################################
 ### Setup source groups                  ###
 ############################################
 
-GROUP_FILES("${Sources}" "Source Files")
-GROUP_FILES("${Headers}" "Header Files")
+group_files("${Sources}" "Source Files")
+group_files("${Headers}" "Header Files")
 
 # Specifies include libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC ${MAIN_PROJECT_NAME})

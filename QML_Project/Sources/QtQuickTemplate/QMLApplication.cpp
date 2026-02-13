@@ -3,7 +3,7 @@
  * @brief Implementation of the QMLApplication class.
  */
 
-#include "QtQuickTemplate/QMLApplication.h"  // Consider renaming file to QMLApplication.h to match class
+#include "QtQuickTemplate/QMLApplication.h"
 
 #include <QApplication>
 #include <QDebug>

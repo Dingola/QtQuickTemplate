@@ -27,6 +27,38 @@ function (build_third_party_project
 	THIRD_PARTY_DIR_PATH 
 	EXT_PROJ_BUILD_TYPE
 )
+	# Prepare forwardable Qt/CMake settings for the external project
+	set(_forward_args "")
+
+	# Propagate THIRD_PARTY_INCLUDE_DIR to external projects so they can find their dependencies
+	if (DEFINED THIRD_PARTY_INCLUDE_DIR AND NOT THIRD_PARTY_INCLUDE_DIR STREQUAL "")
+		file(TO_CMAKE_PATH "${THIRD_PARTY_INCLUDE_DIR}" _tp_inc_norm)
+		list(APPEND _forward_args "-DTHIRD_PARTY_INCLUDE_DIR:PATH=${_tp_inc_norm}")
+	endif()
+
+	if (DEFINED CMAKE_PREFIX_PATH AND NOT CMAKE_PREFIX_PATH STREQUAL "")
+		# Normalize all prefix entries (avoid backslash escape issues on Windows)
+		set(_norm_prefix_list "")
+		foreach(_p ${CMAKE_PREFIX_PATH})
+			file(TO_CMAKE_PATH "${_p}" _p_norm)
+			list(APPEND _norm_prefix_list "${_p_norm}")
+		endforeach()
+		list(JOIN _norm_prefix_list ";" _norm_prefix_joined)
+		list(APPEND _forward_args "-DCMAKE_PREFIX_PATH:PATH=${_norm_prefix_joined}")
+	endif()
+	if (DEFINED Qt6_DIR AND NOT Qt6_DIR STREQUAL "")
+		file(TO_CMAKE_PATH "${Qt6_DIR}" _qt6_dir_norm)
+		list(APPEND _forward_args "-DQt6_DIR:PATH=${_qt6_dir_norm}")
+	endif()
+	if (DEFINED QT_QMAKE_EXECUTABLE AND NOT QT_QMAKE_EXECUTABLE STREQUAL "")
+		file(TO_CMAKE_PATH "${QT_QMAKE_EXECUTABLE}" _qmake_norm)
+		list(APPEND _forward_args "-DQT_QMAKE_EXECUTABLE:FILEPATH=${_qmake_norm}")
+	endif()
+	if (DEFINED CMAKE_PROJECT_INCLUDE_BEFORE AND NOT CMAKE_PROJECT_INCLUDE_BEFORE STREQUAL "")
+		file(TO_CMAKE_PATH "${CMAKE_PROJECT_INCLUDE_BEFORE}" _proj_inc_norm)
+		list(APPEND _forward_args "-DCMAKE_PROJECT_INCLUDE_BEFORE:FILEPATH=${_proj_inc_norm}")
+	endif()
+
 	# Create content of the CMakeLists which is used for downloading and building the third party lib
 	set(CMAKELIST_CONTENT "
 		cmake_minimum_required(VERSION ${CMAKE_MINIMUM_REQUIRED_VERSION})
@@ -45,8 +77,9 @@ function (build_third_party_project
 			CMAKE_GENERATOR_INSTANCE \"${CMAKE_GENERATOR_INSTANCE}\"
 			UPDATE_DISCONNECTED ${DONT_UPDATE_BUILD}
 			CMAKE_ARGS
-				-DCMAKE_INSTALL_PREFIX:PATH=${THIRD_PARTY_DIR_PATH}/${EXT_PROJ_TARGET}_install/
+				-DCMAKE_INSTALL_PREFIX:PATH=${THIRD_PARTY_DIR_PATH}/${EXT_PROJ_TARGET}_install/${EXT_PROJ_BUILD_TYPE}
 				-DCMAKE_BUILD_TYPE=${EXT_PROJ_BUILD_TYPE}
+				${_forward_args}
 				${ARGN}
 		)
 	")
