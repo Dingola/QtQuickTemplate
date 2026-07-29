@@ -1,0 +1,9 @@
+#ifdef {{ macro_prefix }}_USE_DLL
+#ifdef {{ macro_prefix }}_BUILDING_PROJECT
+#define {{ macro_prefix }}_API __declspec(dllexport)
+#else
+#define {{ macro_prefix }}_API __declspec(dllimport)
+#endif
+#else
+#define {{ macro_prefix }}_API
+#endif

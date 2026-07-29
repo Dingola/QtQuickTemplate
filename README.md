@@ -1,436 +1,363 @@
-# Qt Quick Template
+﻿# QtQuickTemplate
 
-## 🚀 [Build Status]
+This repository is both a GitHub template repository and a
+[Copier](https://copier.readthedocs.io/) template for Qt 6 Quick/QML applications and
+libraries.
 
-### 🛠 Build and ✅ Test
+GitHub creates the repository first so that the generated project retains the
+**generated from Dingola/QtQuickTemplate** relationship. Copier then renders all
+project-specific names and settings into that repository.
 
-[![Linux Build and Test](https://github.com/Dingola/QtQuickTemplate/actions/workflows/build_and_test_linux.yml/badge.svg)](https://github.com/Dingola/QtQuickTemplate/actions/workflows/build_and_test_linux.yml)
-[![macOS Build and Test](https://github.com/Dingola/QtQuickTemplate/actions/workflows/build_and_test_macos.yml/badge.svg)](https://github.com/Dingola/QtQuickTemplate/actions/workflows/build_and_test_macos.yml)
-[![Windows Build and Test](https://github.com/Dingola/QtQuickTemplate/actions/workflows/build_and_test_windows.yml/badge.svg)](https://github.com/Dingola/QtQuickTemplate/actions/workflows/build_and_test_windows.yml)
+## Create a project
 
-### Code Coverage
+### 1. Create the repository on GitHub
 
-[![codecov](https://codecov.io/github/Dingola/QtQuickTemplate/graph/badge.svg?token=XH7TDPWZUJ)](https://codecov.io/github/Dingola/QtQuickTemplate)
+1. Open this repository on GitHub.
+2. Select **Use this template** and then **Create a new repository**.
+3. Enter the final repository name, for example `QuickDashboard`.
+4. Select the owner and visibility and create the repository.
 
-<br><br>
+Do not rename the local project directory after cloning unless you also pass an explicit
+`-ProjectName` to the initialization script.
 
-## 📖 [Table of Contents]
-- [Description](#description)
-- [Code Coverage Graphs](#-code-coverage-graphs)
-- [Tokens for GitHub Actions](#-tokens-for-github-actions)
-- [Solution Folder Structure](#solution-folder-structure)
-- [Configuration](#configuration)
-  - [CMake Options](#cmake-options)
-  - [Environment Variables](#environment-variables)
-- [Supported Platforms](#supported-platforms)
-- [How to Install and Run](#how-to-install-and-run)
-  - [1) Prerequisites](#1-prerequisites)
-  - [2) Setting up](#2-setting-up)
-  - [3) Configuring and Building](#3-configuring-and-building)
-  - [4) Run the project](#4-run-the-project)
-  - [5) Deployment](#5-deployment)
-  - [6) Using Docker](#6-using-docker)
-- [Translations](#translations)
-- [Code Style and Linting](#code-style-and-linting)
+### 2. Install local prerequisites
 
-<br><br>
+Install the following tools:
 
-## [Description]
-This project is a template for creating QML-based desktop applications with a C++ backend. The solution 
-is divided into two parts: the main project and a test project. By default, only the 
-main project is built. The test project can be built if desired, controlled by a CMake 
-boolean variable `<PROJECT_NAME>_BUILD_TEST_PROJECT`. Additionally, the CMake variable 
-`<PROJECT_NAME>_BUILD_TARGET_TYPE` must be set to `static_library` for the test project 
-to be executed.
+- Git
+- A stable Python release supported by Copier
+- [pipx](https://pipx.pypa.io/)
+- Copier 9 or newer
 
-The template provides a minimal starting point for Qt Quick applications, supports documentation 
-generation with Doxygen, and includes GitHub workflows (CI builds) for Linux, Mac and Windows.
-<br><br>
+Pre-release Python versions are not recommended because native dependencies may not be
+binary-compatible with early alpha or beta releases. Check the installed Python
+versions first:
 
-## 📊 [Code Coverage Graphs]
-
-| Graph     | Description                                                                                                                                                                                                                     | Visualization                                                                 |
-|-----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| **Sunburst** | The inner-most circle represents the entire project. Moving outward are folders, and finally individual files. The size and color of each slice represent the number of statements and the coverage, respectively. | <img src="https://codecov.io/github/Dingola/QtQuickTemplate/graphs/sunburst.svg?token=XH7TDPWZUJ" alt="Sunburst" height="100" width="200"> |
-| **Grid**     | Each block represents a single file in the project. The size and color of each block represent the number of statements and the coverage, respectively.                                                                      | <img src="https://codecov.io/github/Dingola/QtQuickTemplate/graphs/tree.svg?token=XH7TDPWZUJ" alt="Grid" height="100" width="200">         |
-| **Icicle**   | The top section represents the entire project, followed by folders and individual files. The size and color of each slice represent the number of statements and the coverage, respectively.                                 | <img src="https://codecov.io/github/Dingola/QtQuickTemplate/graphs/icicle.svg?token=XH7TDPWZUJ" alt="Icicle" height="150" width="400">     |
-
-<br><br>
-
-## 🔐 Tokens for GitHub Actions
-
-Some workflows in this repository require tokens to function correctly. Below are the details for the required tokens and how to configure them.
-
-### 1. Codecov Token (Required for Code Coverage)
-
-The **CODECOV_TOKEN** is required to upload code coverage reports to [Codecov](https://codecov.io). This token ensures that only authorized users can upload coverage data for your repository.
-
-#### How to create the Codecov Token:
-
-1. Go to your repository on [Codecov](https://codecov.io).
-2. Navigate to **Settings → Repository → Upload Token**.
-3. Copy the generated token.
-
-### 2. Personal Access Token (PAT) [Optional]
-
-The **Personal Access Token (PAT)** is only required for the disabled workflows in this repository. These workflows are kept for reference and are not actively used in the CI/CD pipeline.
-
-#### How to create the PAT:
-
-1. Go to [GitHub Personal Access Tokens](https://github.com/settings/tokens).
-2. Click **“Generate new token (classic)”**.
-3. Set a name (e.g., `Legacy CI Token`) and expiration date.
-4. Under **Scopes**, check:
-   - `repo`
-5. Click **“Generate token”** and copy the token immediately.
-
-### Adding Tokens as Repository Secrets
-
-Once you have generated the required tokens, add them as secrets in your GitHub repository:
-
-1. Open your repository on GitHub.
-2. Navigate to:
-   **Settings → Secrets and variables → Actions → New repository secret**
-3. Add the following secrets:
-   - **For Codecov**:
-     - **Name**: `CODECOV_TOKEN`
-     - **Secret**: *(paste the Codecov token)*
-   - **For Disabled Workflows**:
-     - **Name**: `PAT_TOKEN`
-     - **Secret**: *(paste the PAT token)*
-
-> **Note**: The `CODECOV_TOKEN` is required for the `build_and_test_linux.yml` workflow to upload coverage reports. The `PAT_TOKEN` is only needed for the disabled workflows.
-
-<br><br>
-
-## [Solution Folder Structure]
-
+```powershell
+py -0p
 ```
+
+The following example uses stable Python 3.14. Replace `3.14` with another installed
+stable version if necessary. Run each command separately:
+
+```powershell
+py -3.14 -m pip install --upgrade pip
+```
+
+```powershell
+py -3.14 -m pip install --user pipx
+```
+
+```powershell
+py -3.14 -m pipx ensurepath
+```
+
+Open a new PowerShell window after `ensurepath`, then install Copier:
+
+```powershell
+py -3.14 -m pipx install --python 3.14 copier
+```
+
+Verify the installation:
+
+```powershell
+pipx --version
+```
+
+```powershell
+copier --version
+```
+
+If `py` is unavailable, install a stable 64-bit Python release from
+[python.org](https://www.python.org/downloads/windows/) and enable the option that adds
+Python to `PATH`.
+
+### 3. Clone and initialize the repository
+
+```powershell
+git clone https://github.com/<OWNER>/QuickDashboard.git
+```
+
+```powershell
+cd QuickDashboard
+```
+
+```powershell
+.\initialize.cmd
+```
+
+The script uses the repository directory name as the CMake project name. It validates
+the Git working tree, runs Copier against `gh:Dingola/QtQuickTemplate`, and removes
+the bootstrap-only files after successful generation.
+
+The repository directory name must be a valid CMake target name: it must start with a
+letter and contain only letters, numbers, and underscores. A repository name such as
+`QuickDashboard` works without additional arguments. A name such as
+`quick-dashboard` does not, because hyphens are not supported by the generated CMake
+option names and workflows.
+
+To test an unreleased template revision:
+
+```powershell
+.\initialize.cmd -VcsRef HEAD
+```
+
+Use released template versions for normal projects. `HEAD` is intended for template
+development and testing.
+
+### 4. Answer the Copier questions
+
+Copier asks for these values:
+
+| Question | Purpose | Example |
+| --- | --- | --- |
+| CMake project and target name | CMake project, target, and test-target prefix | `QuickDashboard` |
+| Human-readable name | Display name shown by Qt | `Quick Dashboard` |
+| Docker name | Lowercase Docker image and container prefix | `quick-dashboard` |
+| Macro prefix | Uppercase C and C++ export-macro prefix | `QUICK_DASHBOARD` |
+| CMake target type | Executable, shared library, or static library | `executable` |
+| Organization name | `QCoreApplication` organization | `Dingola` |
+| Organization domain | `QCoreApplication` domain | `AdrianHelbig.de` |
+| Repository owner | GitHub user or organization used in README links | `Dingola` |
+| Project description | Short generated-project description | `A Qt Quick dashboard application.` |
+
+For applications select `executable`. For libraries select `dynamic_library` or
+`static_library`.
+
+After successful generation, the bootstrap files are removed and
+`.copier-answers.yml` is created. Keep this file under version control; Copier requires
+it for future template updates. Do not edit it manually.
+
+### 5. Review and commit the generated project
+
+```powershell
+git status
+```
+
+```powershell
+git diff
+```
+
+```powershell
+git add .
+```
+
+```powershell
+git commit -m "Initialize project from QtQuickTemplate"
+```
+
+```powershell
+git push
+```
+
+The GitHub template relationship remains intact because the repository was originally
+created with **Use this template**.
+
+### 6. Configure repository services
+
+After the first push:
+
+1. Open the repository's **Actions** tab and confirm that the generated workflows are enabled.
+2. Add the repository to Codecov if coverage uploads are required.
+3. Add `CODECOV_TOKEN` under **Settings > Secrets and variables > Actions**.
+4. Review repository visibility, branch protection, topics, and description.
+
+The generated README contains the detailed Codecov setup.
+
+## Generated-project releases
+
+Every generated project contains `.github/workflows/release.yml`. Pushing a semantic
+version tag such as `v1.0.0` starts one workflow that:
+
+1. validates the tag and creates a draft GitHub Release;
+2. tests the tagged revision;
+3. builds native Windows, Linux, and macOS packages in parallel;
+4. uploads packages directly to the draft as GitHub Release Assets;
+5. creates `SHA256SUMS.txt`; and
+6. publishes the release only after every required platform succeeds.
+
+The workflow does not use `actions/upload-artifact`, so release binaries do not consume
+the GitHub Actions artifact-storage quota. A failed platform build leaves the release
+as a draft for inspection and reruns replace assets with `--clobber`.
+
+Applications produce a Windows portable ZIP and NSIS installer, a Linux AppImage, and
+a deployed macOS application ZIP. Static and shared libraries produce platform SDK
+archives containing the installed headers, libraries, and CMake package files.
+
+The version follows this single path:
+
+```text
+Git tag v1.2.3
+    -> MAIN_PROJECT_VERSION=1.2.3
+    -> project(VERSION 1.2.3)
+    -> Config.h and CMake package metadata
+    -> versioned release asset names
+```
+
+Template-version tags and generated-project release tags belong to different
+repositories. This template uses tags such as `1.0.0` for Copier updates. Generated
+projects use tags such as `v1.0.0` for application or library releases.
+
+## Troubleshooting initialization
+
+### PowerShell blocks scripts
+
+Use the command wrapper:
+
+```powershell
+.\initialize.cmd
+```
+
+It applies `ExecutionPolicy Bypass` only to the child PowerShell process and does not
+change the persistent user or machine policy. If the wrapper is unavailable, use:
+
+```powershell
+powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File ".\initialize.ps1"
+```
+
+### `pipx` or `copier` is not found
+
+Reapply the user `PATH` configuration and then open a new terminal:
+
+```powershell
+py -3.14 -m pipx ensurepath
+```
+
+For the current PowerShell session, the pipx binary directory can be added immediately:
+
+```powershell
+$env:Path += ";" + (py -3.14 -m pipx environment --value PIPX_BIN_DIR)
+```
+
+Then verify:
+
+```powershell
+copier --version
+```
+
+### Initialization reports a dirty working tree
+
+The initialization intentionally refuses to overwrite uncommitted work. A repository
+created and freshly cloned through **Use this template** should initially be clean:
+
+```powershell
+git status
+```
+
+Commit or intentionally discard unrelated changes before running the initializer
+again.
+
+### Initialization fails while Copier is running
+
+The bootstrap files are retained when Copier fails. Correct the reported problem and
+run `.\initialize.cmd` again. Do not manually remove `template/` or `copier.yml`.
+
+## Update a generated project
+
+Generated projects contain `.copier-answers.yml`. Do not edit that file manually.
+Start from a clean Git working tree:
+
+```powershell
+git status
+```
+
+```powershell
+copier update
+```
+
+Review all changes and resolve possible conflicts before committing:
+
+```powershell
+git diff
+```
+
+```powershell
+git add .
+```
+
+```powershell
+git commit -m "Update project from QtQuickTemplate"
+```
+
+```powershell
+git push
+```
+
+## Template maintenance
+
+The repository root contains the bootstrap:
+
+```text
 .
-├── .git                    # Git repository metadata
-├── .github                 # GitHub-specific files (CI workflows)
-├── CMake                   # CMake files used in both the project and tests
-├── Configs                 # Configuration files for clang-tidy, clang-format, Doxygen, etc.
-├── QML_Project             # The main project
-│   ├── CMake               # CMake files specific to the project
-│   ├── Headers             # Header files
-│   ├── Resources           # Resource files
-│   ├── Sources             # Source files
-│   ├── QML                 # QML frontend files
-│   ├── ThirdParty          # CMake files for external dependencies
-│   ├── CMakeLists.txt      # CMake configuration file for the project
-│   ├── Config.h.in         # Configuration header template
-│   ├── main.cpp            # Main application entry point
-│   └── resources.qrc       # Qt resource file
-├── QML_Project_Tests       # Tests for the project
-│   ├── Headers             # Header files for tests
-│   ├── Sources             # Source files for tests
-│   ├── ThirdParty          # CMake files for external dependencies used in tests
-│   ├── CMakeLists.txt      # CMake configuration file for tests
-│   └── main.cpp            # Main entry point for tests
-├── Scripts                 # Scripts for building and deploying on various platforms
-│   ├── Win                 # Windows-specific scripts
-│   ├── Linux               # Linux-specific scripts
-│   └── Mac                 # Mac-specific scripts
-├── Dockerfile              # Dockerfile for building and running the project in a container
-├── .gitignore              # Git ignore file
-├── CMakeLists.txt          # Top-level CMake configuration file
-└── README.md               # Project README file
-```
-<br><br><br>
-
-## [Configuration]
-
-### CMake-Options
-* **<PROJECT_NAME>_BUILD_TARGET_TYPE:** Specifies the type of build for the application. Possible values are:
-  - `executable`
-  - `dynamic_library`
-  - `static_library`
-
-* **<PROJECT_NAME>_BUILD_TEST_PROJECT:** Specifies whether the **TestProject** should also be built. Default is **Off**.
-
-* **USE_CLANG_FORMAT:** Specifies whether `clang-format` should be used for code formatting. Default is **Off**.
-
-* **USE_CLANG_TIDY:** Specifies whether `clang-tidy` should be used for static analysis. Default is **Off**.
-
-* **CLANG_TOOLS_PATH:** Specifies the path to the `clang-format` and `clang-tidy` executables.
-
-* **<PROJECT_NAME>_BUILD_DOC:** Specifies whether **documentation** should be generated for the app and/or its test project. The generated documentation is located in the `doc` folder within the binary directory, with separate subfolders for the app and the test project. The formatting specifications for the documentation can be centrally configured in the Doxyfile.in file, located in the solution folder. The default setting is **Off**.
-
-* **THIRD_PARTY_INCLUDE_DIR:** Specifies where the third-party libraries will be installed. The default path is:
-  - **`$USERPROFILE/ThirdParty`** on Windows
-  - **`$HOME/ThirdParty`** on Unix-based systems.
-
-* **SANITIZER_TYPE:** Specifies the type of sanitizer to use for the build process. Supported values are:
-  - `none`
-  - `address`
-  - `leak`
-  - `memory`
-  - `thread`
-  - `address_and_leak`
-  - `address_and_memory`
-  - `memory_and_leak`
-  - `address_memory_and_leak`
-> [!NOTE]
-> **Platform-specific notes:**
->  - MSVC supports: `none`, `address`
->  - UNIX supports: all of the above
-<br>
-
----
-<br>
-
-### Environment Variables
-* **CMAKE_PREFIX_PATH:** Points CMake to the Qt 6 installation (e.g., C:\Qt\6.8.0\msvc2022_64 on Windows, ~/Qt/6.8.0/gcc_64 on Linux, ~/Qt/6.8.0/clang_64 on macOS).
-<br><br><br>
-
-## [Supported Platforms]
-- Windows 10+
-- Linux (tested on Ubuntu 24.04.1)
-- Mac (tested on macOS Ventura)
-<br><br><br>
-
-## [How To Install and Run]
-
-### 1) Prerequisites
-* CMake ( Minimum required version 3.19.0 ): [Download](https://cmake.org/download/ "CMake Downloads")
-* A C++20 compatible compiler (e.g., GCC 10+, Clang 10+, MSVC 19.28+)
-* Qt Installer (Qt 6.8): [Download](https://www.qt.io/download-qt-installer-oss)
-* Optional: Docker (if using the Docker workflow in [6) Using Docker](#6-using-docker)): [Download Docker](https://www.docker.com/)
-* Optional: VcXsrv (if displaying the GUI on a Windows host in [6) Using Docker](#6-using-docker)): [Download VcXsrv](https://sourceforge.net/projects/vcxsrv/)
-* Optional: Doxygen (if documentation generation is enabled): [Download](https://www.doxygen.nl/download.html)
-* Optional for Doxygen is LaTeX if enabled in `Doxygen.in`-File and installed.
-* Optional: `zip` for creating ZIP archives (if `BUILD_ZIP_ARCHIVE` is set to `true` in `build_and_deploy.sh`)
-* Optional: `NSIS` for creating installers (if `BUILD_NSIS_INSTALLER` is set to `true` in `build_and_deploy.sh`)
-* Optional: **Ninja**: Required to generate `compile_commands.json` for `clang-tidy`. [Download Ninja](https://github.com/ninja-build/ninja/wiki/Pre-built-Ninja-packages)
-* Optional: **clang-format** and **clang-tidy**: To use `clang-format` and `clang-tidy`, download the appropriate precompiled binary from the [LLVM Release Page](https://releases.llvm.org/download.html)
-<br>
-
-> [!TIP]
-> The CMake GUI presents another alternative option to build the project.
-
-> [!NOTE]
-> All other dependencies are automatically installed by CMake or the respective script.
-<br>
-
----
-<br>
-
-### 2) Setting up
-```
-git clone https://github.com/Dingola/QtQuickTemplate.git
-cd QtQuickTemplate/
-```
-<br>
-
----
-<br>
-
-### 3) Configuring and Building
-> [!IMPORTANT]
-> Ensure CMake can find Qt by setting `-DCMAKE_PREFIX_PATH` to your Qt install, for example: `..\Qt\6.8.0\msvc2022_64`
-```
-cmake -B _build -S . -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:\Qt\6.8.0\msvc2022_64"
-cd _build
-cmake --build . --config Release
-```
-<br>
-
----
-<br>
-
-### 4) Run the project
-```
-cd QtQuickTemplate/Release/
-./QtQuickTemplate.exe
-```
-<br>
-
----
-<br>
-
-### 5) Deployment
-The project includes scripts for building, testing and deploying the application. These scripts are located in the `Scripts` directory, organized by platform (e.g., `Win` for Windows, `Linux` for Linux).
-
-- **build_release.sh:** Builds the project in release mode.
-- **build_and_run_tests.sh:** Builds and runs the test project.
-- **build_and_deploy.sh:** Builds and deploys the project. This script can also create a ZIP archive of the deployment directory and/or an NSIS installer using the `installer.nsi` script (Windows only).
-
-To create a ZIP archive of the deployment directory, set `BUILD_ZIP_ARCHIVE` to `true` in `build_and_deploy.sh`.
-
-To create an NSIS installer (Windows only), set `BUILD_NSIS_INSTALLER` to `true` in `build_and_deploy.sh`.
-<br><br>
-
----
-<br>
-
-### 6) Using Docker
-
-#### 1. Build the Docker Image
-Build the Docker image using the following command:
-```
-docker build -t qtquicktemplate-dockerimage .
-```
-<br>
-
-#### 2. Ways to Run the Docker Image
-- **Run directly:**
-```
-docker run qtquicktemplate-dockerimage
-```
-- **Start an interactive Bash shell:**
-```
-docker run -it qtquicktemplate-dockerimage bash
-```
-<br>
-
-#### 3. Run the App or Tests in the Container
-- **Start the app (virtual display with Xvfb):**
-```
-Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & export DISPLAY=:99 && ./_build_app_release/QML_Project/QtQuickTemplate
-```
-- **Run the tests (virtual display with Xvfb):**
-```
-Xvfb :99 -screen 0 1920x1080x24 -nolisten tcp & export DISPLAY=:99 && ./_build_tests_release/QML_Project_Tests/QtQuickTemplate_Tests
-```
-<br>
-
-#### 4. Display GUI on the Host Machine (Windows)
-1. Download and install **VcXsrv Windows X Server**: [Download VcXsrv](https://sourceforge.net/projects/vcxsrv/).
-2. Configure VcXsrv:
-   - Select **Multiple windows** and set **Display number** to `99`.
-   - Choose **Start no client**.
-   - Enable **Disable access control**.
-   - Alternatively, use the preconfigured `config.xlaunch` file located in the `Configs` folder of this project. Double-click the file to launch VcXsrv with the correct settings.
-3. Start the Docker container:
-```
-docker run -it --name QtQuickTemplate-Container --network host -e DISPLAY=<IP-ADDRESS>:99.0 -e TERM=xterm-256color -e QT_X11_NO_MITSHM=1 QtQuickTemplate-DockerImage bash
-```
-> [!NOTE]
-> Replace `<IP-ADDRESS>` with the host's IP address (e.g., `192.168.1.2`). Do not use `127.0.0.1` or `localhost`.
-
-4. Inside the container:
-- **Start the app:**
-```
-"./_build_app_release/QML_Project/QtQuickTemplate"
-```
-- **Run the tests:**
-```
-"./_build_tests_release/QML_Project_Tests/QtQuickTemplate_Tests"
-```
-<br>
-
-#### 5. Note on Display Number
-- The display number in the `DISPLAY` variable is **99.0**, not `99`.
-- You can verify this in the VcXsrv logs. Look for a line like:
-```
-winClipboardThreadProc - DISPLAY=127.0.0.1:99.0
-```
-- Ensure the `DISPLAY` variable is set correctly, e.g.:
-```
-export DISPLAY=192.168.1.2:99.0
-```
-<br>
-
-#### 6. Additional Notes
-- Ensure the firewall on the host allows connections to the X11 server (VcXsrv).
-- If the GUI does not display, check the `DISPLAY` variable and the VcXsrv logs.
-<br><br><br>
-
-## [Translations]
-The project includes custom targets for updating and compiling translation files. These targets are defined in the CMake file located in `QtQuickTemplate/QML_Project` and can be used to manage translation files located in the `QtQuickTemplate/QML_Project/resources/Translations` directory.
-
-> [!NOTE]
-> The translation files are specified in the CMake file. Initially, only `app_de.ts` and `app_en.ts` are included. To support additional languages, you will need to add the corresponding `.ts` files to the CMake configuration.
-
-<br>
-
-### Updating Translations
-To update the translation files, use the following custom target:
-```
-_translations_update
-```
-<br>
-
----
-<br>
-
-### Compiling Translations
-To compile the translation files, use the following custom target:
-```
-_translations_compile
-```
-<br><br><br>
-
-## [Code Style and Linting]
-
-This project uses `clang-format` and `clang-tidy` for code formatting and static analysis.
-
-<br>
-
-### Downloading clang-format and clang-tidy
-
-To use `clang-format` and `clang-tidy`, download the appropriate precompiled binary from the [LLVM Release Page](https://releases.llvm.org/download.html). Here are the recommended files based on your operating system:
-
-- **Windows**: [clang+llvm-18.1.8-x86_64-pc-windows-msvc.tar.xz](https://releases.llvm.org/download.html#18.1.8)
-- **Linux**: [clang+llvm-18.1.8-x86_64-linux-gnu-ubuntu-18.04.tar.xz](https://releases.llvm.org/download.html#18.1.8)
-- **macOS**: [clang+llvm-18.1.8-arm64-apple-macos11.tar.xz](https://releases.llvm.org/download.html#18.1.8)
-<br>
-
----
-<br>
-
-### Configuration
-
-To use `clang-format` and `clang-tidy` in your project, you need to set the following options in your CMake configuration:
-
-- **USE_CLANG_FORMAT**: Enable this option to use `clang-format` for code formatting.
-- **USE_CLANG_TIDY**: Enable this option to use `clang-tidy` for static analysis.
-- **CLANG_TOOLS_PATH**: Specify the path to the `clang-format` and `clang-tidy` executables.
-<br>
-
----
-<br>
-
-### Code Formatting
-
-To format the C++ code and run static analysis, use the following custom targets:
-
-```
-_run_clang_format_project
-_run_clang_tidy_project
+|-- .github/
+|   `-- workflows/
+|       `-- validate_template.yml
+|-- copier.yml
+|-- initialize.cmd
+|-- initialize.ps1
+|-- README.md
+`-- template/
+    |-- .github/
+    |   |-- release-config.env.jinja
+    |   `-- workflows/
+    |       `-- release.yml
+    |-- Configs/
+    |   `-- AppIcon.svg
+    |-- README.md.jinja
+    |-- Dockerfile.jinja
+    |-- CMakeLists.txt.jinja
+    |-- QML_Project/
+    |-- QML_Project_Tests/
+    `-- Scripts/
 ```
 
-To format the C++ code, run the following command after enabling the USE_CLANG_FORMAT option and specifying the path to clang-format:
+All files that must appear in generated projects belong under `template/`. Files whose
+contents contain Copier expressions use the `.jinja` suffix. Copier removes this suffix
+when rendering.
 
-```
-cmake -DUSE_CLANG_FORMAT=ON -DCLANG_TOOLS_PATH="C:/path/to/clang+llvm-18.1.8-x86_64-pc-windows-msvc/bin" ..
-cmake --build . --target _run_clang_format_project
-cmake --build . --target _run_clang_format_tests
-```
+Generated release settings are stored in `template/.github/release-config.env.jinja`.
+The rendered `.github/release-config.env` is consumed by `release.yml` and contains the
+project name, display name, target type, and publisher.
 
-To run static analysis with clang-tidy, ensure the USE_CLANG_TIDY option is enabled and the path to clang-tidy is specified:
+After changing the template:
 
-```
-cmake -DUSE_CLANG_TIDY=ON -DCLANG_TOOLS_PATH="C:/path/to/clang+llvm-18.1.8-x86_64-pc-windows-msvc/bin" ..
-cmake --build . --target _run_clang_tidy_project
-cmake --build . --target _run_clang_tidy_tests
-```
-<br>
+1. Generate a test project into a separate directory.
+2. Configure, build, and test the generated project.
+3. Review and commit the template changes.
+4. Push the default branch and wait for `Validate Copier Template`.
+5. Create and push a new PEP 440-compatible template tag.
 
----
-<br>
+Example local generation:
 
-### Generating compile_commands.json
-
-To use `clang-tidy`, you need to generate the `compile_commands.json` file. Run the `generate_compile_commands.sh` script to generate this file:
-```
-./Scripts/generate_compile_commands.sh
+```powershell
+copier copy . ..\QtQuickTemplateSmokeTest
 ```
 
-> [!NOTE]
-> If you encounter the following error:
->
-> Ninja Does not match the generator used previously..  Either remove the CMakeCache.txt file and CMakeFiles directory or choose a different binary directory.
->
-> This error occurs if the build directory specified in the script already exists and was built with a different generator. Either remove the CMake cache or adjust the script to use a different(/new) build directory.
+Example commit and template release:
+
+```powershell
+git status
+```
+
+```powershell
+git add .
+```
+
+```powershell
+git commit -m "Describe the template change"
+```
+
+```powershell
+git push origin main
+```
+
+```powershell
+git tag -a 1.0.0 -m "Release template 1.0.0"
+```
+
+```powershell
+git push origin 1.0.0
+```
+
+Copier selects released tags for normal generation and uses them to calculate future
+project updates.

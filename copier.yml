@@ -1,0 +1,63 @@
+_min_copier_version: "9.0.0"
+_subdirectory: template
+_answers_file: .copier-answers.yml
+
+project_name:
+  type: str
+  help: CMake project and target name
+  validator: >-
+    {% if not (project_name | regex_search('^[A-Za-z][A-Za-z0-9_]*$')) %}
+    The project name must start with a letter and contain only letters, numbers, and underscores.
+    {% endif %}
+
+display_name:
+  type: str
+  help: Human-readable application or library name
+  default: "{{ project_name }}"
+
+docker_name:
+  type: str
+  help: Lowercase name used for Docker images and containers
+  default: "{{ project_name | lower }}"
+  validator: >-
+    {% if not (docker_name | regex_search('^[a-z0-9][a-z0-9._-]*$')) %}
+    The Docker name must be lowercase and may contain letters, numbers, dots, underscores, and hyphens.
+    {% endif %}
+
+macro_prefix:
+  type: str
+  help: Prefix used for generated C and C++ macros
+  default: "{{ project_name | upper }}"
+  validator: >-
+    {% if not (macro_prefix | regex_search('^[A-Z][A-Z0-9_]*$')) %}
+    The macro prefix must start with an uppercase letter and contain only uppercase letters, numbers, and underscores.
+    {% endif %}
+
+project_type:
+  type: str
+  help: CMake target type
+  choices:
+    Qt Quick/QML application: executable
+    Shared library: dynamic_library
+    Static library: static_library
+  default: executable
+
+organization_name:
+  type: str
+  help: Organization name used by QCoreApplication
+  default: Dingola
+
+organization_domain:
+  type: str
+  help: Organization domain used by QCoreApplication
+  default: AdrianHelbig.de
+
+repository_owner:
+  type: str
+  help: GitHub user or organization that owns the generated repository
+  default: Dingola
+
+project_description:
+  type: str
+  help: Short project description
+  default: A Qt 6 Quick/QML project.
