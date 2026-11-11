@@ -252,6 +252,34 @@ again.
 The bootstrap files are retained when Copier fails. Correct the reported problem and
 run `.\initialize.cmd` again. Do not manually remove `template/` or `copier.yml`.
 
+## Develop with local dependency sources
+
+Generated projects resolve dependencies in this order:
+
+1. an explicitly configured local source directory,
+2. an already installed CMake package,
+3. the dependency's configured Git repository.
+
+Set `<TargetName>_SOURCE_DIR` while configuring to develop a project and one of its libraries
+together without an intermediate commit, push, or install:
+
+```powershell
+cmake -S . -B _build_local `
+  -DQtQuickCommonLib_SOURCE_DIR=D:/Projects/VS_Projects/QtQuickCommonLib
+```
+
+The directory must contain a `CMakeLists.txt` that defines the expected target. An invalid path or
+a missing target stops configuration with a focused error. When the variable is empty or unset,
+the normal package and Git fallback remains unchanged.
+
+Each dependency also exposes `<TargetName>_USE_LOCAL_SOURCE` as a CMake cache checkbox. Leave the
+local path configured and switch this option to `OFF` in CMake GUI to return to the normal package
+and Git fallback without clearing the cache. Switching it back to `ON` reuses the saved local path.
+
+Store machine-specific paths in the CMake cache, an IDE configuration, or the ignored
+`CMakeUserPresets.json`. Do not add local absolute paths to `CMakeLists.txt`, dependency declarations,
+or `.copier-answers.yml`.
+
 ## Update a generated project
 
 Generated projects contain `.copier-answers.yml`. Do not edit that file manually.

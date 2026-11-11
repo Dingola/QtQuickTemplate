@@ -75,6 +75,35 @@ jobs:
         with:
           cmake-version: "4.1.1"
 
+      - name: Verify local dependency source override
+        shell: bash
+        run: |
+          fixture_dir="${GITHUB_WORKSPACE}/Tests/LocalDependencyOverride"
+          cmake \
+            -S "${fixture_dir}" \
+            -B "${RUNNER_TEMP}/local-dependency-override" \
+            -DLocalTestDependency_SOURCE_DIR="${fixture_dir}/Dependency"
+          cmake --build "${RUNNER_TEMP}/local-dependency-override" --config "${BUILD_TYPE}"
+
+          cmake \
+            -S "${fixture_dir}" \
+            -B "${RUNNER_TEMP}/local-dependency-fallback" \
+            -DLocalTestDependency_SOURCE_DIR="${fixture_dir}/MissingTarget" \
+            -DLocalTestDependency_USE_LOCAL_SOURCE=OFF
+          cmake --build "${RUNNER_TEMP}/local-dependency-fallback" --config "${BUILD_TYPE}"
+
+          if cmake \
+            -S "${fixture_dir}" \
+            -B "${RUNNER_TEMP}/local-dependency-missing-target" \
+            -DLocalTestDependency_SOURCE_DIR="${fixture_dir}/MissingTarget" \
+            >"${RUNNER_TEMP}/local-dependency-missing-target.log" 2>&1; then
+            echo "Configuration unexpectedly accepted a local project without the required target."
+            exit 1
+          fi
+
+          grep -q "LOCAL_SOURCE_TARGET_MISSING" \
+            "${RUNNER_TEMP}/local-dependency-missing-target.log"
+
       - name: Configure generated project
         shell: bash
         run: |

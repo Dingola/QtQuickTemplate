@@ -37,21 +37,21 @@ set(DOC_TARGET_NAME tests)
 ### Setup Project File Includes          ###
 ############################################
 
-file(GLOB_RECURSE Headers
+file(GLOB_RECURSE ${PROJECT_NAME}_HEADERS CONFIGURE_DEPENDS
      "Headers/*.h"
 )
 
-file(GLOB_RECURSE CPP_Sources
+file(GLOB_RECURSE ${PROJECT_NAME}_CPP_SOURCES CONFIGURE_DEPENDS
      "main.cpp"
      "Sources/*.cpp"
 )
 
-file(GLOB_RECURSE QML_Sources
+file(GLOB_RECURSE ${PROJECT_NAME}_QML_SOURCES CONFIGURE_DEPENDS
      "QML/*.qml"
 )
 
 # Combine C++ and QML sources
-set(Sources ${CPP_Sources} ${QML_Sources})
+set(${PROJECT_NAME}_SOURCES ${${PROJECT_NAME}_CPP_SOURCES} ${${PROJECT_NAME}_QML_SOURCES})
 
 include_directories(Headers Sources)
 
@@ -62,8 +62,8 @@ include_directories(Headers Sources)
 find_package(Qt6 REQUIRED COMPONENTS Widgets Qml Quick QuickControls2 Gui Test LinguistTools)
 
 qt_standard_project_setup()
-#qt6_add_resources(RSCS resources.qrc)
-#add_custom_target(gen_qrc DEPENDS ${RSCS})
+#qt6_add_resources(${PROJECT_NAME}_RESOURCES resources.qrc)
+#add_custom_target(gen_qrc DEPENDS ${${PROJECT_NAME}_RESOURCES})
 
 ############################################
 ### Clang-Format Configuration           ###
@@ -77,8 +77,8 @@ if(USE_CLANG_FORMAT)
             COMMAND ${CLANG_FORMAT}
             -style=file:${CMAKE_SOURCE_DIR}/Configs/.clang-format
             -i
-            ${Headers}
-            ${CPP_Sources}
+            ${${PROJECT_NAME}_HEADERS}
+            ${${PROJECT_NAME}_CPP_SOURCES}
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "Formatting code with clang-format"
         )
@@ -100,8 +100,8 @@ if(USE_CLANG_TIDY)
             COMMAND ${CLANG_TIDY}
 			--config-file=${CMAKE_SOURCE_DIR}/Configs/.clang-tidy
             -p=${CMAKE_BINARY_DIR}
-            ${Headers}
-            ${CPP_Sources}
+            ${${PROJECT_NAME}_HEADERS}
+            ${${PROJECT_NAME}_CPP_SOURCES}
             WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             COMMENT "Running clang-tidy for static analysis"
         )
@@ -175,8 +175,8 @@ target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 target_sources(${PROJECT_NAME}
     PRIVATE
-		${Headers}
-		${Sources}
+		${${PROJECT_NAME}_HEADERS}
+		${${PROJECT_NAME}_SOURCES}
 )
 
 if (WIN32)
@@ -220,8 +220,8 @@ endif()
 ### Setup source groups                  ###
 ############################################
 
-group_files("${Sources}" "Source Files")
-group_files("${Headers}" "Header Files")
+group_files("${${PROJECT_NAME}_SOURCES}" "Source Files")
+group_files("${${PROJECT_NAME}_HEADERS}" "Header Files")
 
 # Specifies include libraries
 target_link_libraries(${PROJECT_NAME} PUBLIC ${MAIN_PROJECT_NAME})
